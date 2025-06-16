@@ -7,21 +7,12 @@ use Illuminate\Http\Request;
 
 class LeadController extends Controller
 {
-    // public function index(Request $request)
-    // {
-    //     $perPage = $request->get('perPage', 50);
-
-    //     $leads = Lead::orderBy('id', 'desc') // or created_at
-    //         ->cursorPaginate($perPage);
-
-    //     return response()->json($leads);
-    // }
-
-
     public function index(Request $request)
     {
-        $perPage = $request->get('perPage', 10); // optional
-        $leads = Lead::orderBy('id')->cursorPaginate($perPage);
+        $perPage = $request->get('perPage', 10);
+
+        $leads = Lead::orderBy('id', 'desc') // or created_at
+            ->cursorPaginate($perPage);
 
         return response()->json($leads);
     }
@@ -29,9 +20,18 @@ class LeadController extends Controller
 
     // public function index(Request $request)
     // {
+    //     $perPage = $request->get('perPage', 10); // optional
+    //     $leads = Lead::orderBy('id')->cursorPaginate($perPage);
+
+    //     return response()->json($leads);
+    // }
+
+
+    // public function index(Request $request)
+    // {
     //     $perPage = $request->get('perPage', 20);
 
-    //     $leads = Lead::orderBy('created_at', 'desc')
+    //     $leads = Lead::orderBy('id', 'desc')
     //         ->paginate($perPage);
 
     //     return response()->json($leads);
