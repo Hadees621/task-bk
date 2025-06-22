@@ -7,3 +7,4 @@ Route::middleware('api')->group(function () {
     Route::get('/leads', [LeadController::class, 'index']);
     Route::post('/leads', [LeadController::class, 'store']);
 });
+ 
