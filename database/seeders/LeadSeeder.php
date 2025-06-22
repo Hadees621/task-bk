@@ -1,5 +1,4 @@
 <?php
-
 namespace Database\Seeders;
 
 use App\Models\Lead;
@@ -9,6 +8,6 @@ class LeadSeeder extends Seeder
 {
     public function run(): void
     {
-        Lead::factory()->count(50000)->create(); // Creates 50 dummy leads
+        Lead::factory()->count(5000)->create();
     }
 }
