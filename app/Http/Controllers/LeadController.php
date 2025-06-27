@@ -38,4 +38,22 @@ class LeadController extends Controller
             'lead'    => $lead,
         ], 201);
     }
+
+    public function search(Request $request)
+    {
+        $query = $request->get('q', '');
+
+        if (empty($query)) {
+            return response()->json([
+                'data'    => [],
+                'message' => 'Search query is empty',
+            ], 400);
+        }
+
+        $results = Lead::search($query)->get();
+
+        return response()->json([
+            'data' => $results,
+        ]);
+    }
 }

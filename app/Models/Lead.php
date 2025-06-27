@@ -1,13 +1,13 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Lead extends Model
 {
-    use HasFactory;
+    use HasFactory, Searchable;
 
     protected $fillable = [
         'full_name',
@@ -21,8 +21,19 @@ class Lead extends Model
         'notes',
     ];
 
+    public function toSearchableArray()
+    {
+        return [
+            'full_name'    => $this->full_name,
+            'email'        => $this->email,
+            'phone_number' => $this->phone_number,
+            'company_name' => $this->company_name,
+            'notes'        => $this->notes,
+        ];
+    }
+
     public static function newFactory()
     {
-        return \Database\Factories\LeadFactory::new();
+        return \Database\Factories\LeadFactory::new ();
     }
 }
