@@ -11,23 +11,32 @@ class LeadController extends Controller
 
     public function index(Request $request)
     {
-        $page     = max((int) $request->get('page', 1), 1);
-        $perPage  = max(min((int) $request->get('perPage', 10), 100), 1);
+        $start = microtime(true);
+
+        $page    = max((int) $request->get('page', 1), 1);
+        $perPage = max(min((int) $request->get('perPage', 10), 100), 1);
+
         $cacheKey = "leads:index:page:{$page}:perPage:{$perPage}";
         $cacheTTL = 300;
 
+        $usedCache = false;
+
         if (Cache::has($cacheKey)) {
-            Log::info("✅ CACHE HIT: $cacheKey");
+            Log::info("📦 CACHE USED → Key: $cacheKey");
+            $usedCache = true;
         } else {
-            Log::info("❌ CACHE MISS: $cacheKey");
+            Log::info("🧠 DATABASE USED → Key: $cacheKey");
         }
 
         $leads = Cache::remember($cacheKey, $cacheTTL, function () use ($page, $perPage) {
-            Log::info("🧠 Fetching from DB for page: $page");
             return Lead::orderBy('id', 'desc')
                 ->paginate($perPage, ['*'], 'page', $page)
                 ->toArray();
         });
+
+        $duration = number_format((microtime(true) - $start) * 1000, 2);
+
+        Log::info("⏱️ TIME TAKEN → {$duration} ms | Source: " . ($usedCache ? 'CACHE' : 'DB'));
 
         return response()->json($leads);
     }
