@@ -3,15 +3,36 @@ namespace App\Http\Controllers;
 
 use App\Models\Lead;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class LeadController extends Controller
 {
+    // public function index(Request $request)
+    // {
+    //     $perPage = $request->get('perPage', 10);
+
+    //     $leads = Lead::orderBy('id', 'desc')
+    //         ->cursorPaginate($perPage);
+
+    //     return response()->json($leads);
+    // }
+
     public function index(Request $request)
     {
+        $page    = $request->get('page', 1);
         $perPage = $request->get('perPage', 10);
 
-        $leads = Lead::orderBy('id', 'desc')
-            ->cursorPaginate($perPage);
+        // Generate cache key based on API params
+        $cacheKey = "leads_api_page:{$page}:perPage:{$perPage}";
+
+        // Use remember with array conversion for Redis serialization
+        $leads = Cache::remember($cacheKey, 60, function () use ($perPage, $page) {
+            return Lead::orderBy('id', 'desc')
+                ->paginate($perPage, ['*'], 'page', $page)
+                ->toArray();
+        });
+
+        Cache::put('test_key', ['name' => 'Saad', 'role' => 'dev'], 60);
 
         return response()->json($leads);
     }
@@ -50,7 +71,7 @@ class LeadController extends Controller
             ], 400);
         }
 
-        $results = Lead::search($query)->get();
+        $results = Lead::search($query)->get(500);
 
         return response()->json([
             'data' => $results,

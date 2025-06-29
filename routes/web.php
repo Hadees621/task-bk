@@ -1,6 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LeadController;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/test-leads', [LeadController::class, 'index']);
+
+Route::get('/test-redis', function () {
+    Cache::put('foo', 'bar', 60); // stores 'bar' for 60 minutes
+    return Cache::get('foo');     // should return 'bar'
+});

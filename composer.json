@@ -10,7 +10,8 @@
         "laravel/framework": "^11.0",
         "laravel/scout": "^10.15",
         "laravel/tinker": "^2.9",
-        "meilisearch/meilisearch-php": "^1.15"
+        "meilisearch/meilisearch-php": "^1.15",
+        "predis/predis": "^3.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
