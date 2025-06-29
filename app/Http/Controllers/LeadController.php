@@ -4,40 +4,34 @@ namespace App\Http\Controllers;
 use App\Models\Lead;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class LeadController extends Controller
 {
-    // public function index(Request $request)
-    // {
-    //     $perPage = $request->get('perPage', 10);
-
-    //     $leads = Lead::orderBy('id', 'desc')
-    //         ->cursorPaginate($perPage);
-
-    //     return response()->json($leads);
-    // }
 
     public function index(Request $request)
     {
-        $page    = $request->get('page', 1);
-        $perPage = $request->get('perPage', 10);
+        $page     = max((int) $request->get('page', 1), 1);
+        $perPage  = max(min((int) $request->get('perPage', 10), 100), 1);
+        $cacheKey = "leads:index:page:{$page}:perPage:{$perPage}";
+        $cacheTTL = 300;
 
-        // Generate cache key based on API params
-        $cacheKey = "leads_api_page:{$page}:perPage:{$perPage}";
+        if (Cache::has($cacheKey)) {
+            Log::info("✅ CACHE HIT: $cacheKey");
+        } else {
+            Log::info("❌ CACHE MISS: $cacheKey");
+        }
 
-        // Use remember with array conversion for Redis serialization
-        $leads = Cache::remember($cacheKey, 60, function () use ($perPage, $page) {
+        $leads = Cache::remember($cacheKey, $cacheTTL, function () use ($page, $perPage) {
+            Log::info("🧠 Fetching from DB for page: $page");
             return Lead::orderBy('id', 'desc')
                 ->paginate($perPage, ['*'], 'page', $page)
                 ->toArray();
         });
 
-        Cache::put('test_key', ['name' => 'Saad', 'role' => 'dev'], 60);
-
         return response()->json($leads);
     }
 
-    // POST /api/leads
     public function store(Request $request)
     {
         $validated = $request->validate([
