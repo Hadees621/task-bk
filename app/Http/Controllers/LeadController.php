@@ -9,37 +9,84 @@ use Illuminate\Support\Facades\Cache;
 class LeadController extends Controller
 {
 
+
     public function index(Request $request)
     {
-        $start = microtime(true);
-
         $page = max((int) $request->get('page', 1), 1);
-        $perPage = max(min((int) $request->get('perPage', 10), 100), 1);
+        $perPage = max((int) $request->get('perPage', 10), 1);
 
-        $cacheKey = "leads:index:page:{$page}:perPage:{$perPage}";
+        // Get relevant filter params from the request
+        $filters = $request->only(['status', 'score_min', 'score_max', 'assigned_to', 'source']);
+
+        // Build a unique cache key based on filters + pagination
+        $filterKey = http_build_query(array_filter($filters));
+        $cacheKey = "leads:index:{$filterKey}:page:{$page}:perPage:{$perPage}";
         $cacheTTL = 300;
 
-        $usedCache = false;
-        
-        if (Cache::has($cacheKey)) {
-            Log::info("📦 CACHE USED → Key: $cacheKey");
-            $usedCache = true;
-        } else {
-            Log::info("🧠 DATABASE USED → Key: $cacheKey");
-        }
+        $leads = Cache::remember($cacheKey, $cacheTTL, function () use ($filters, $perPage, $page) {
+            $query = Lead::query();
 
-        $leads = Cache::remember($cacheKey, $cacheTTL, function () use ($page, $perPage) {
-            return Lead::orderBy('id', 'desc')
+            // Clean, scalable filter logic
+            if (!empty($filters['status'])) {
+                $query->where('status', $filters['status']);
+            }
+
+            if (!empty($filters['score_min'])) {
+                $query->where('lead_score', '>=', (int) $filters['score_min']);
+            }
+
+            if (!empty($filters['score_max'])) {
+                $query->where('lead_score', '<=', (int) $filters['score_max']);
+            }
+
+            if (!empty($filters['assigned_to'])) {
+                $query->where('assigned_to', $filters['assigned_to']);
+            }
+
+            if (!empty($filters['source'])) {
+                $query->where('source', $filters['source']);
+            }
+
+            return $query->orderBy('id', 'desc')
                 ->paginate($perPage, ['*'], 'page', $page)
                 ->toArray();
         });
 
-        $duration = number_format((microtime(true) - $start) * 1000, 2);
-
-        Log::info("⏱️ TIME TAKEN → {$duration} ms | Source: " . ($usedCache ? 'CACHE' : 'DB'));
-
         return response()->json($leads);
     }
+
+
+    // public function index(Request $request)
+    // {
+    //     $start = microtime(true);
+
+    //     $page = max((int) $request->get('page', 1), 1);
+    //     $perPage = max(min((int) $request->get('perPage', 10), 100), 1);
+
+    //     $cacheKey = "leads:index:page:{$page}:perPage:{$perPage}";
+    //     $cacheTTL = 300;
+
+    //     $usedCache = false;
+
+    //     if (Cache::has($cacheKey)) {
+    //         Log::info("📦 CACHE USED → Key: $cacheKey");
+    //         $usedCache = true;
+    //     } else {
+    //         Log::info("🧠 DATABASE USED → Key: $cacheKey");
+    //     }
+
+    //     $leads = Cache::remember($cacheKey, $cacheTTL, function () use ($page, $perPage) {
+    //         return Lead::orderBy('id', 'desc')
+    //             ->paginate($perPage, ['*'], 'page', $page)
+    //             ->toArray();
+    //     });
+
+    //     $duration = number_format((microtime(true) - $start) * 1000, 2);
+
+    //     Log::info("⏱️ TIME TAKEN → {$duration} ms | Source: " . ($usedCache ? 'CACHE' : 'DB'));
+
+    //     return response()->json($leads);
+    // }
 
     public function store(Request $request)
     {
