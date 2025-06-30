@@ -15,10 +15,9 @@ class LeadController extends Controller
         $page = max((int) $request->get('page', 1), 1);
         $perPage = max((int) $request->get('perPage', 10), 1);
 
-        // Get relevant filter params from the request
-        $filters = $request->only(['status', 'score_min', 'score_max', 'assigned_to', 'source']);
+        // Get all filters including q
+        $filters = $request->only(['q', 'status', 'score_min', 'score_max', 'assigned_to', 'source']);
 
-        // Build a unique cache key based on filters + pagination
         $filterKey = http_build_query(array_filter($filters));
         $cacheKey = "leads:index:{$filterKey}:page:{$page}:perPage:{$perPage}";
         $cacheTTL = 300;
@@ -26,7 +25,17 @@ class LeadController extends Controller
         $leads = Cache::remember($cacheKey, $cacheTTL, function () use ($filters, $perPage, $page) {
             $query = Lead::query();
 
-            // Clean, scalable filter logic
+            // 🔍 Apply search filter
+            if (!empty($filters['q'])) {
+                $searchTerm = $filters['q'];
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('full_name', 'like', "%{$searchTerm}%")  // <- this was 'name'
+                        ->orWhere('email', 'like', "%{$searchTerm}%")
+                        ->orWhere('phone_number', 'like', "%{$searchTerm}%"); // <- this was 'phone'
+                });
+            }
+
+
             if (!empty($filters['status'])) {
                 $query->where('status', $filters['status']);
             }
