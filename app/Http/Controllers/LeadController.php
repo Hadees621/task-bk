@@ -3,8 +3,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Lead;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class LeadController extends Controller
 {
@@ -20,7 +20,7 @@ class LeadController extends Controller
         $cacheTTL = 300;
 
         $usedCache = false;
-
+        
         if (Cache::has($cacheKey)) {
             Log::info("📦 CACHE USED → Key: $cacheKey");
             $usedCache = true;
@@ -69,7 +69,6 @@ class LeadController extends Controller
             'lead' => $lead,
         ], 201);
     }
-
 
     public function search(Request $request)
     {
