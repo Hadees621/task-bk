@@ -3,7 +3,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class CustomerFactory extends Factory
+class CustomersFactory extends Factory
 {
     public function definition(): array
     {
