@@ -3,10 +3,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Customers extends Model
 {
-    use HasFactory;
+    use HasFactory, Searchable;
 
     protected $fillable = [
         'first_name',
@@ -22,4 +23,9 @@ class Customers extends Model
         'dob',
         'gender',
     ];
+
+    public function toSearchableArray()
+    {
+        return $this->only(['id', 'first_name', 'last_name', 'email', 'nationality', 'gender']);
+    }
 }
