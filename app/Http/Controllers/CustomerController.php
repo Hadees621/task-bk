@@ -8,13 +8,10 @@ use Illuminate\Http\Request;
 class CustomerController extends Controller
 {
 
-
-
     public function index(Request $request)
     {
         $query = Customers::query();
 
-        // Global text search
         if ($request->filled('q')) {
             $search = $request->input('q');
             $query->where(function ($q) use ($search) {
@@ -24,7 +21,6 @@ class CustomerController extends Controller
             });
         }
 
-        // Apply filters
         if ($request->filled('gender')) {
             $query->where('gender', $request->input('gender'));
         }
@@ -47,24 +43,5 @@ class CustomerController extends Controller
 
         return Customers::search($query)->paginate(20);
     }
-
-
-    // public function index()
-    // {
-    //     return Customers::cursorPaginate(20);
-    // }
-
-    // public function search(Request $request)
-    // {
-    //     $query = $request->input('q');
-
-    //     if (!$query) {
-    //         return response()->json(['message' => 'Search query is required'], 400);
-    //     }
-
-    //     $results = Customers::search($query)->get();
-
-    //     return response()->json($results);
-    // }
 
 }
