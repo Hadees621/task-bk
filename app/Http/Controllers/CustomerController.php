@@ -12,14 +12,14 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        return Customers::all();
+        return Customers::cursorPaginate(20); 
     }
 
     /**
      * Show the form for creating a new resource.
      */
     public function create()
-    {
+    {   
         //
     }
 
