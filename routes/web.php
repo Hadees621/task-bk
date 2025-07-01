@@ -1,12 +1,6 @@
 <?php
 
-use App\Http\Controllers\LeadController;
+use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/leads/test', [LeadController::class, 'index']);
-
-// Route::get('/test-redis', function () {
-//     Cache::put('foo', 'bar', 60); // stores 'bar' for 60 minutes
-//     return Cache::get('foo');     // should return 'bar'
-// });
-    
+Route::get('/test-customer', [CustomerController::class, 'index']);
