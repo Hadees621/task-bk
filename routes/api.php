@@ -5,4 +5,5 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('api')->group(function () {
     Route::get('/customers', [CustomerController::class, 'index']);
+    Route::get('/search', [CustomerController::class, 'search']);
 });

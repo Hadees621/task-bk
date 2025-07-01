@@ -12,54 +12,22 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        return Customers::cursorPaginate(20); 
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {   
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
+        return Customers::cursorPaginate(20);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function search(Request $request)
     {
-        //
+        $query = $request->input('q');
+
+        if (! $query) {
+            return response()->json(['message' => 'Search query is required'], 400);
+        }
+
+        $results = Customers::search($query)->get();
+
+        return response()->json($results);
     }
 }

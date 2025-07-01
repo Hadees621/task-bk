@@ -26,7 +26,7 @@ class Customers extends Model
 
     public function toSearchableArray()
     {
-        return $this->only(['id', 'first_name', 'last_name', 'email', 'nationality', 'gender']);
+        return $this->only(['first_name', 'last_name', 'nationality']);
     }
 }
 
